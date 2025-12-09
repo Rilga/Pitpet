@@ -116,6 +116,10 @@ class AdminController extends Controller
                     ->with('groomer') 
                     ->get();
 
-        return view('admin.maps', compact('orders'));
+        $ordersArray = $orders->toArray(); 
+
+        return view('admin.maps', [
+            'orders' => $ordersArray // Kirim Array yang aman
+        ]);
     }
 }
