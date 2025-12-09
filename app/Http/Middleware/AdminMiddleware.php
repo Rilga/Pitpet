@@ -16,17 +16,9 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Pengecekan keamanan tambahan (Double check Auth)
-        if (!Auth::check()) {
-            return redirect('login');
-        }
-
         if (Auth::user()->role == 'admin') {
             return $next($request);
         }
-        
-        // UBAH DARI: return redirect()->back();
-        // KE: Abort 403 (Respons yang lebih sederhana dan lebih aman di Serverless)
-        abort(403, 'Unauthorized access to Admin section.'); 
+        return redirect()->back();
     }
 }
