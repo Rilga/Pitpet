@@ -93,42 +93,32 @@ class AdminController extends Controller
     
     public function schedule(Request $request)
     {
-        // ... (kode lainnya TIDAK BERUBAH)
-    
-        // PERBAIKAN: Gunakan paginate() daripada get() untuk membatasi memori
+        $date = $request->input('date', now()->format('Y-m-d'));
+        $groomers = User::where('role', 'user')->get();
+
+        // FIX MEMORI: HAPUS with('pets') yang kompleks
         $orders = Order::whereDate('date', $date)
-                        ->with('pets')
+                        // ->with('pets') <-- DIHAPUS
                         ->where('status', '!=', 'cancelled')
-                        // UBAH DARI ->get()
-                        ->paginate(1); // Ambil hanya 1 baris untuk tujuan pengujian
-    
-        $counts = [];
-        $filterStatus = null; 
-    
-        return view('admin.schedule', [
+                        ->get(); // Collection object
+
+        return view('admin.schedule', array_merge([
             'date' => $date,
             'groomers' => $groomers,
-            'orders' => $orders, // Paginator object
-            'counts' => $counts,
-            'filterStatus' => $filterStatus 
-        ]);
+            'orders' => $orders
+        ], $this->getLayoutDependencies()));
     }
-    
+
     public function mapView()
     {
-        // PERBAIKAN: Gunakan paginate() daripada get() untuk membatasi memori
+        // FIX MEMORI: HAPUS with('groomer')
         $orders = Order::where('status', 'pending')
                         ->whereNotNull('customer_address')
-                        // Hapus with('groomer') SEMENTARA (jika ada)
-                        ->paginate(1); // Ambil hanya 1 baris untuk tujuan pengujian
-    
-        $counts = [];
-        $filterStatus = null; 
-    
-        return view('admin.maps', [
-            'orders' => $orders, // Paginator object
-            'counts' => $counts,
-            'filterStatus' => $filterStatus 
-        ]);
+                        // ->with('groomer') <-- DIHAPUS
+                        ->get(); // Collection object
+
+        return view('admin.maps', array_merge([
+            'orders' => $orders
+        ], $this->getLayoutDependencies()));
     }
 }
