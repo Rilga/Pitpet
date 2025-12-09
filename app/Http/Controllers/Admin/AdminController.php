@@ -113,18 +113,22 @@ class AdminController extends Controller
     {
         $orders = Order::where('status', 'pending')
                     ->whereNotNull('customer_address')
-                    ->with('groomer') 
-                    ->get();
-
-        $ordersArray = $orders->toArray(); 
-
-        $counts = [];
-        $filterStatus = null;
-
-        return view('admin.maps', [
-            'orders' => $ordersArray,
-            'counts' => $counts, // <--- TAMBAHKAN
-            'filterStatus' => $filterStatus // <--- TAMBAHKAN
-        ]);
+                    // Hapus with('groomer') lagi, jika masih ada
+                    ->get(); 
+        
+        // UBAH: Kembalikan JSON langsung alih-alih view
+        return response()->json($orders->toArray()); 
+        
+        /* Hapus atau komentari kode asli di bawah ini saat pengujian:
+        
+        // $ordersArray = $orders->toArray(); 
+        // $counts = [];
+        // $filterStatus = null; 
+    
+        // return view('admin.maps', [
+        //     'orders' => $ordersArray,
+        //     'counts' => $counts,
+        //     'filterStatus' => $filterStatus 
+        // ]);
+        */
     }
-}
