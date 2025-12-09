@@ -6,8 +6,28 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Admin\AdminController;
 
+use Illuminate\Support\Facades\Artisan;
+
 
 use App\Http\Controllers\Order\OrderController;
+
+Route::get('/setup-db-temp-only-run-once', function () {
+    try {
+        // 1. Membersihkan Cache Konfigurasi
+        Artisan::call('config:clear');
+        
+        // 2. Migrasi Database
+        Artisan::call('migrate', ['--force' => true]);
+        
+        // 3. Seeding Database (Membuat Admin & Groomer)
+        Artisan::call('db:seed', ['--force' => true]);
+
+        return 'Database Migrated and Seeded Successfully! **HAPUS ROUTE INI SEKARANG.**';
+    } catch (\Exception $e) {
+        // Jika ada kesalahan koneksi atau lainnya
+        return 'Setup Failed: ' . $e->getMessage();
+    }
+});
 
 Route::get('/', function () {
     return view('welcome');
