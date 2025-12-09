@@ -118,8 +118,13 @@ class AdminController extends Controller
 
         $ordersArray = $orders->toArray(); 
 
+        $counts = [];
+        $filterStatus = null;
+
         return view('admin.maps', [
-            'orders' => $ordersArray // Kirim Array yang aman
+            'orders' => $ordersArray,
+            'counts' => $counts, // <--- TAMBAHKAN
+            'filterStatus' => $filterStatus // <--- TAMBAHKAN
         ]);
     }
 }
