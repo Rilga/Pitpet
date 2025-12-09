@@ -113,7 +113,6 @@ class AdminController extends Controller
     {
         $orders = Order::where('status', 'pending')
                     ->whereNotNull('customer_address')
-                    ->with('groomer') 
                     ->get();
 
         $ordersArray = $orders->toArray(); 
