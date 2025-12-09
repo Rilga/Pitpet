@@ -95,33 +95,41 @@ class AdminController extends Controller
     {
         $date = $request->input('date', now()->format('Y-m-d'));
         $groomers = User::where('role', 'user')->get();
-
-        // Ambil Order dan konversi ke Array untuk keamanan JSON
+    
+        // HILANGKAN ->toArray()
         $orders = Order::whereDate('date', $date)
                         ->with('pets')
                         ->where('status', '!=', 'cancelled')
-                        ->get()
-                        ->toArray(); // Diperkuat dengan toArray()
-
-        // Gabungkan data dengan variabel layout yang dibutuhkan
-        return view('admin.schedule', array_merge([
+                        ->get(); 
+    
+        // Safety: Variabel Layout (Tetap wajib)
+        $counts = [];
+        $filterStatus = null; 
+    
+        return view('admin.schedule', [
             'date' => $date,
             'groomers' => $groomers,
-            'orders' => $orders
-        ], $this->getLayoutDependencies()));
+            'orders' => $orders, // Collection object dikirim
+            'counts' => $counts,
+            'filterStatus' => $filterStatus 
+        ]);
     }
-
+    
     public function mapView()
     {
-        // Ambil Order dan konversi ke Array untuk keamanan JSON
+        // HILANGKAN ->toArray()
         $orders = Order::where('status', 'pending')
                         ->whereNotNull('customer_address')
-                        ->get()
-                        ->toArray(); // Diperkuat dengan toArray()
-
-        // Gabungkan data dengan variabel layout yang dibutuhkan
-        return view('admin.maps', array_merge([
-            'orders' => $orders
-        ], $this->getLayoutDependencies()));
+                        ->get(); // Collection object
+    
+        // Safety: Variabel Layout (Tetap wajib)
+        $counts = [];
+        $filterStatus = null; 
+    
+        return view('admin.maps', [
+            'orders' => $orders, // Collection object dikirim
+            'counts' => $counts,
+            'filterStatus' => $filterStatus 
+        ]);
     }
 }
