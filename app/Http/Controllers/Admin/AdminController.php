@@ -178,7 +178,7 @@ class AdminController extends Controller
             ];
         });
         
-        return view('admin.schedule', array_merge([
+        return view('admin.Schedule', array_merge([
             'date' => $date,
             'scheduleData' => $scheduleData, // <-- DATA BARU
         ], $this->getLayoutDependencies()));
@@ -191,7 +191,7 @@ class AdminController extends Controller
                     ->with('groomer') // <-- AKTIFKAN KEMBALI INI
                     ->get(); 
 
-        return view('admin.maps', array_merge([
+        return view('admin.Maps', array_merge([
             'orders' => $orders
         ], $this->getLayoutDependencies()));
     }
