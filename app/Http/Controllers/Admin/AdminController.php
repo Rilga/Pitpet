@@ -91,13 +91,35 @@ class AdminController extends Controller
         return redirect()->route('admin.dashboard')->with('success', 'Order berhasil diperbarui!');
     }
     
-    public function schedule(Request $request)
+        public function schedule(Request $request)
     {
-        return response('Maps OK (Test View Bypass)', 200);
+        // 1. Ambil tanggal dari input, atau default hari ini
+        $date = $request->input('date', now()->format('Y-m-d'));
+
+        // 2. Ambil semua Groomer
+        $groomers = User::where('role', 'user')->get();
+
+        // 3. Ambil Order pada tanggal tersebut (Eager Loading untuk performa)
+        // Kita ambil semua order di hari itu agar tidak query berulang-ulang di view
+        $orders = Order::whereDate('date', $date)
+                       ->with('pets') // Ambil detail hewan untuk kolom 'Keterangan'
+                       ->where('status', '!=', 'cancelled')
+                       ->get();
+
+        return view('admin.schedule', [
+            'date' => $date,
+            'groomers' => $groomers,
+            'orders' => $orders
+        ]);
     }
 
     public function mapView()
     {
-        return response('Maps OK (Test View Bypass)', 200);
+        $orders = Order::where('status', 'pending')
+                    ->whereNotNull('customer_address')
+                    ->with('groomer') 
+                    ->get();
+
+        return view('admin.maps', compact('orders'));
     }
 }
