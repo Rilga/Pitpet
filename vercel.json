@@ -2,14 +2,14 @@
     "version": 2,
     "framework": null,
     "functions": {
-        "api/index.php": { "runtime": "vercel-php@0.6.0" }
+        "api/index.php": { "runtime": "vercel-php@0.7.2" }
     },
     "routes": [
         { "src": "/build/(.*)", "dest": "/public/build/" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
     "public": true,
-    "buildCommand": "vite build",
+    "buildCommand": "npm run prod-setup && vite build",
     "outputDirectory": "public",
     "env": {
         "APP_ENV": "production",
@@ -26,9 +26,9 @@
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "DB_CONNECTION": "mysql",
-        "DB_HOST": "4gg.h.filess.io",
-        "DB_PORT": "3306",
-        "DB_DATABASE": "db2024_stormtorn",
-        "DB_USERNAME": "db2024_stormtorn"
+        "DB_HOST": "lb1qqs.h.filess.io",
+        "DB_PORT": "3307",
+        "DB_DATABASE": "database_pitpet_yetdiagram",
+        "DB_USERNAME": "database_pitpet_yetdiagram"
     }
 }
