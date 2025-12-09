@@ -38,7 +38,7 @@
                                     {{ $groomer->name }}
                                 </h3>
                                 <p class="text-blue-100 text-sm print:text-gray-600">
-                                    {{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}
+                                    {{ date('l, d F Y', strtotime($date)) }}
                                 </p>
                             </div>
                             <div class="text-white font-bold text-2xl opacity-50 print:text-black print:opacity-100">
