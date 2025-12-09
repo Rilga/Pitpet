@@ -61,7 +61,7 @@
             L.marker([storeLat, storeLng], {icon: storeIcon}).addTo(map).bindPopup("<b>🏠 PitPet Clinic</b>");
 
             // 2. Data Orders
-            const orders = @json($orders);
+            const orders = @json($orders->toArray());
             const totalOrders = orders.length;
             let processedCount = 0;
             let drawnRoutes = []; // Menyimpan semua layer rute yang ditarik
