@@ -186,15 +186,13 @@ class AdminController extends Controller
 
     public function mapView()
     {
-        // FIX MEMORI & JSON ENCODING: Hapus eager loading dan kirim sebagai array
         $orders = Order::where('status', 'pending')
-                        ->whereNotNull('customer_address')
-                        ->get(); 
-        
-        $ordersArray = $orders->toArray(); // Konversi ke array di Controller
+                    ->whereNotNull('customer_address')
+                    ->with('groomer') // <-- AKTIFKAN KEMBALI INI
+                    ->get(); 
 
         return view('admin.maps', array_merge([
-            'orders' => $ordersArray // Kirim sebagai array
+            'orders' => $orders
         ], $this->getLayoutDependencies()));
     }
 }
