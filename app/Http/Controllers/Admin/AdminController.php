@@ -10,31 +10,38 @@ use App\Models\User;
 
 class AdminController extends Controller
 {
+    // --- VARIABEL GLOBAL YANG DIBUTUHKAN LAYOUT ---
+    // Variabel ini dibutuhkan oleh x-app-layout jika ia memanggil badge count/filter dari dashboard.
+    private function getLayoutDependencies()
+    {
+        return [
+            'counts' => [],
+            'filterStatus' => null
+        ];
+    }
+    // ---------------------------------------------
+    
     public function index(Request $request)
     {
-        // Ambil status filter dari URL query (default: null)
         $filterStatus = $request->query('status');
 
+        // Query Dashboard Utama
         $query = Order::query()->with('groomer');
         
-        // 1. Logika Filter Status
         if ($filterStatus && $filterStatus !== 'all') {
             $query->where('status', $filterStatus);
         }
 
-        // 2. Logika Ordering (Prioritas Pending, lalu berdasarkan waktu masuk terbaru)
         if (!$filterStatus || $filterStatus === 'all') {
-            // Jika tidak difilter, urutkan: Pending > Confirmed > Completed, lalu berdasarkan waktu masuk
             $query->orderByRaw("FIELD(status, 'pending', 'confirmed', 'completed', 'cancelled', 'rejected')");
             $query->orderBy('created_at', 'desc'); 
         } else {
-            // Jika difilter per status, hanya urutkan berdasarkan waktu masuk terbaru
             $query->orderBy('created_at', 'desc');
         }
 
         $orders = $query->paginate(10);
         
-        // Ambil total order per status untuk statistik di header
+        // Ambil total order per status
         $counts = Order::select('status', DB::raw('count(*) as total'))
                     ->groupBy('status')
                     ->pluck('total', 'status')
@@ -43,20 +50,19 @@ class AdminController extends Controller
         return view('admin.dashboard', [
             'orders' => $orders,
             'counts' => $counts,
-            'filterStatus' => $filterStatus // Kirim filter aktif ke view
+            'filterStatus' => $filterStatus
         ]);
     }
 
     public function edit(Order $order)
     {
-        // 1. AMBIL GROOMER DARI DATABASE
-        // Mengambil semua user yang role-nya 'user' (sebagai groomer)
         $groomers = User::where('role', 'user')->get();
 
-        return view('admin.order.edit', [
+        // Gabungkan data dengan variabel layout yang dibutuhkan
+        return view('admin.order.edit', array_merge([
             'order' => $order,
-            'groomers' => $groomers // Kirim data user/groomer ke view
-        ]);
+            'groomers' => $groomers
+        ], $this->getLayoutDependencies())); 
     }
 
     public function update(Request $request, Order $order)
@@ -73,15 +79,13 @@ class AdminController extends Controller
 
         $timeSlotString = $request->start_time . '-' . $request->end_time;
 
-        // 3. Update Data
         $order->update([
             'customer_name' => $request->customer_name,
             'customer_phone' => $request->customer_phone,
             'date' => $request->date,
-            'time_slot' => $timeSlotString, // Simpan gabungannya
+            'time_slot' => $timeSlotString,
             'status' => $request->status,
             'groomer_id' => $request->groomer_id,
-            // Jika ada field lain, tambahkan di sini
         ]);
 
         return redirect()->route('admin.dashboard')->with('success', 'Order berhasil diperbarui!');
@@ -89,32 +93,35 @@ class AdminController extends Controller
     
     public function schedule(Request $request)
     {
-        // 1. Ambil tanggal dari input, atau default hari ini
         $date = $request->input('date', now()->format('Y-m-d'));
-
-        // 2. Ambil semua Groomer
         $groomers = User::where('role', 'user')->get();
 
-        // 3. Ambil Order pada tanggal tersebut (Eager Loading untuk performa)
-        // Kita ambil semua order di hari itu agar tidak query berulang-ulang di view
+        // Ambil Order dan konversi ke Array untuk keamanan JSON
         $orders = Order::whereDate('date', $date)
-                       ->with('pets') // Ambil detail hewan untuk kolom 'Keterangan'
-                       ->where('status', '!=', 'cancelled')
-                       ->get();
+                        ->with('pets')
+                        ->where('status', '!=', 'cancelled')
+                        ->get()
+                        ->toArray(); // Diperkuat dengan toArray()
 
-        return view('admin.schedule', [
+        // Gabungkan data dengan variabel layout yang dibutuhkan
+        return view('admin.schedule', array_merge([
             'date' => $date,
             'groomers' => $groomers,
             'orders' => $orders
-        ]);
+        ], $this->getLayoutDependencies()));
     }
 
     public function mapView()
     {
+        // Ambil Order dan konversi ke Array untuk keamanan JSON
         $orders = Order::where('status', 'pending')
-                    ->whereNotNull('customer_address')
-                    ->with('groomer') 
-                    ->get();
+                        ->whereNotNull('customer_address')
+                        ->get()
+                        ->toArray(); // Diperkuat dengan toArray()
 
-        return view('admin.maps', compact('orders'));
+        // Gabungkan data dengan variabel layout yang dibutuhkan
+        return view('admin.maps', array_merge([
+            'orders' => $orders
+        ], $this->getLayoutDependencies()));
     }
+}
