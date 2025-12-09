@@ -30,6 +30,5 @@
         "DB_PORT": "3307",
         "DB_DATABASE": "database_pitpet_yetdiagram",
         "DB_USERNAME": "database_pitpet_yetdiagram",
-        "DB_PASSWORD": "31cd7093ac7facfed0370721496a9a96628644fe"
     }
 }
