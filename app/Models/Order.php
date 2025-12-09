@@ -20,6 +20,11 @@ class Order extends Model
         'groomer_id',
     ];
 
+    public function pets()
+    {
+        return $this->hasMany(OrderPet::class);
+    }
+    
     public function groomer()
     {
         // 'groomer_id' adalah nama kolom di tabel orders
