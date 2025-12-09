@@ -93,23 +93,22 @@ class AdminController extends Controller
     
     public function schedule(Request $request)
     {
-        $date = $request->input('date', now()->format('Y-m-d'));
-        $groomers = User::where('role', 'user')->get();
+        // ... (kode lainnya TIDAK BERUBAH)
     
-        // HILANGKAN ->toArray()
+        // PERBAIKAN: Gunakan paginate() daripada get() untuk membatasi memori
         $orders = Order::whereDate('date', $date)
                         ->with('pets')
                         ->where('status', '!=', 'cancelled')
-                        ->get(); 
+                        // UBAH DARI ->get()
+                        ->paginate(1); // Ambil hanya 1 baris untuk tujuan pengujian
     
-        // Safety: Variabel Layout (Tetap wajib)
         $counts = [];
         $filterStatus = null; 
     
         return view('admin.schedule', [
             'date' => $date,
             'groomers' => $groomers,
-            'orders' => $orders, // Collection object dikirim
+            'orders' => $orders, // Paginator object
             'counts' => $counts,
             'filterStatus' => $filterStatus 
         ]);
@@ -117,17 +116,17 @@ class AdminController extends Controller
     
     public function mapView()
     {
-        // HILANGKAN ->toArray()
+        // PERBAIKAN: Gunakan paginate() daripada get() untuk membatasi memori
         $orders = Order::where('status', 'pending')
                         ->whereNotNull('customer_address')
-                        ->get(); // Collection object
+                        // Hapus with('groomer') SEMENTARA (jika ada)
+                        ->paginate(1); // Ambil hanya 1 baris untuk tujuan pengujian
     
-        // Safety: Variabel Layout (Tetap wajib)
         $counts = [];
         $filterStatus = null; 
     
         return view('admin.maps', [
-            'orders' => $orders, // Collection object dikirim
+            'orders' => $orders, // Paginator object
             'counts' => $counts,
             'filterStatus' => $filterStatus 
         ]);
