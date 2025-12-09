@@ -11,20 +11,21 @@ use Illuminate\Support\Facades\Artisan;
 
 use App\Http\Controllers\Order\OrderController;
 
-Route::get('/setup-db-temp-only-run-once', function () {
+Route::get('/setup-db-fresh-run-once', function () {
+    // Gunakan password atau token rahasia di sini jika ini adalah aplikasi publik
+    
     try {
         // 1. Membersihkan Cache Konfigurasi
         Artisan::call('config:clear');
         
-        // 2. Migrasi Database
-        Artisan::call('migrate', ['--force' => true]);
+        // 2. MIGRATE FRESH: Hapus semua tabel, buat ulang
+        Artisan::call('migrate:fresh', ['--force' => true]);
         
         // 3. Seeding Database (Membuat Admin & Groomer)
         Artisan::call('db:seed', ['--force' => true]);
 
-        return 'Database Migrated and Seeded Successfully! **HAPUS ROUTE INI SEKARANG.**';
+        return 'Database Migrated:Fresh and Seeded Successfully! **HAPUS ROUTE INI SEKARANG.**';
     } catch (\Exception $e) {
-        // Jika ada kesalahan koneksi atau lainnya
         return 'Setup Failed: ' . $e->getMessage();
     }
 });
