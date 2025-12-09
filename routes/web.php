@@ -6,29 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Admin\AdminController;
 
-use Illuminate\Support\Facades\Artisan;
-
-
 use App\Http\Controllers\Order\OrderController;
-
-Route::get('/setup-db-fresh-run-once', function () {
-    // Gunakan password atau token rahasia di sini jika ini adalah aplikasi publik
-    
-    try {
-        // 1. Membersihkan Cache Konfigurasi
-        Artisan::call('config:clear');
-        
-        // 2. MIGRATE FRESH: Hapus semua tabel, buat ulang
-        Artisan::call('migrate:fresh', ['--force' => true]);
-        
-        // 3. Seeding Database (Membuat Admin & Groomer)
-        Artisan::call('db:seed', ['--force' => true]);
-
-        return 'Database Migrated:Fresh and Seeded Successfully! **HAPUS ROUTE INI SEKARANG.**';
-    } catch (\Exception $e) {
-        return 'Setup Failed: ' . $e->getMessage();
-    }
-});
 
 Route::get('/', function () {
     return view('welcome');
