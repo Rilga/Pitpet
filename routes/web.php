@@ -10,14 +10,13 @@ use App\Http\Controllers\Order\OrderController;
 
 use Illuminate\Support\Facades\Artisan;
 
-Route::get('/cache-clear-temp', function () {
+Route::get('/test-db-connection', function () {
+    // Coba koneksi database yang sangat sederhana
     try {
-        Artisan::call('optimize:clear'); // Ini mencakup config, route, view, dll.
-        Artisan::call('cache:clear');
-
-        return 'All Laravel Caches Cleared Successfully! **HAPUS ROUTE INI SEKARANG.**';
+        $orders = App\Models\Order::count(); // Gunakan namespace yang lengkap
+        return "Database connected and Order count: " . $orders;
     } catch (\Exception $e) {
-        return 'Cache Clear Failed: ' . $e->getMessage();
+        return "Database Connection Failed: " . $e->getMessage();
     }
 });
 
