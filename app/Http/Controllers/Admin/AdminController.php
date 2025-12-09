@@ -94,94 +94,24 @@ class AdminController extends Controller
     
     public function schedule(Request $request)
     {
+        // 1. Ambil tanggal dari input, atau default hari ini
         $date = $request->input('date', now()->format('Y-m-d'));
+
+        // 2. Ambil semua Groomer
         $groomers = User::where('role', 'user')->get();
 
+        // 3. Ambil Order pada tanggal tersebut (Eager Loading untuk performa)
+        // Kita ambil semua order di hari itu agar tidak query berulang-ulang di view
         $orders = Order::whereDate('date', $date)
-                        ->with('pets') 
-                        ->where('status', '!=', 'cancelled')
-                        ->get();
+                       ->with('pets') // Ambil detail hewan untuk kolom 'Keterangan'
+                       ->where('status', '!=', 'cancelled')
+                       ->get();
 
-        // ----------------------------------------------------
-        // FIX MEMORI: PINDAHKAN LOGIKA JADWAL DARI VIEW KE CONTROLLER
-        // ----------------------------------------------------
-        $scheduleData = $groomers->map(function($groomer) use ($orders, $date) {
-            $groomerOrders = $orders->filter(fn($o) => $o->groomer_id == $groomer->id)
-                                    ->sortBy(fn($o) => explode('-', $o->time_slot)[0]);
-            
-            $schedule = [];
-            $skipHours = [];
-            
-            for ($hour = 8; $hour <= 16; $hour++) {
-                $timeString = sprintf('%02d:00', $hour);
-                
-                if (isset($skipHours[$hour])) {
-                    $schedule[] = ['time' => $timeString, 'type' => 'skipped', 'order' => null];
-                    continue; 
-                }
-
-                $order = $groomerOrders->first(function($o) use ($timeString) {
-                    $start = explode('-', $o->time_slot)[0];
-                    return trim($start) == $timeString;
-                });
-
-                if ($order) {
-                    [$startStr, $endStr] = explode('-', $order->time_slot);
-                    // Pastikan try-catch untuk Carbon
-                    try {
-                        $startTime = Carbon::createFromFormat('H:i', trim($startStr));
-                        $endTime = Carbon::createFromFormat('H:i', trim($endStr));
-                        $duration = $startTime->diffInHours($endTime);
-                    } catch (\Exception $e) {
-                        $duration = 1; // Default jika error
-                    }
-                    
-                    $rowspan = $duration > 0 ? $duration : 1;
-                    for($h = 1; $h < $rowspan; $h++) { $skipHours[$hour + $h] = true; }
-                    
-                    $addOnNames = [ 
-                        'Lion Cut', 'Styling', 'Additional Handling', 'Bulu Gimbal & Kusut', 'Cukur Bulu Perut',
-                        'Full Shave Cut', 'PitPet Styling', 'Brushing Teeth'
-                    ];
-                    // Konversi ke array sebelum filter untuk stabilitas memori
-                    $petsArray = $order->pets->toArray();
-
-                    $mainServicesList = collect($petsArray)->filter(fn($pet) => !in_array($pet['service_name'], $addOnNames))->toArray();
-                    $addOnsList = collect($petsArray)->filter(fn($pet) => in_array($pet['service_name'], $addOnNames));
-                    
-                    $notes = [];
-                    $cats = collect($mainServicesList)->where('pet_type', 'cat')->count();
-                    $dogs = collect($mainServicesList)->where('pet_type', 'dog')->count();
-                    
-                    if($cats > 0) $notes[] = "$cats Kucing";
-                    if($dogs > 0) $notes[] = "$dogs Anjing";
-                    
-                    $schedule[] = [
-                        'time' => $timeString, 
-                        'type' => 'booked', 
-                        'rowspan' => $rowspan,
-                        'order' => $order->toArray(), // Kirim Order sebagai Array
-                        'services' => [
-                            'main' => $mainServicesList,
-                            'addons' => $addOnsList->pluck('service_name')->implode(', '),
-                            'notes' => implode(', ', $notes),
-                        ]
-                    ];
-                } else {
-                     $schedule[] = ['time' => $timeString, 'type' => 'available', 'order' => null];
-                }
-            }
-            
-            return [
-                'groomer' => $groomer,
-                'schedule' => $schedule,
-            ];
-        });
-        
-        return view('admin.Schedule', array_merge([
+        return view('admin.Schedule', [
             'date' => $date,
-            'scheduleData' => $scheduleData, // <-- DATA BARU
-        ], $this->getLayoutDependencies()));
+            'groomers' => $groomers,
+            'orders' => $orders
+        ]);
     }
 
     public function mapView()
