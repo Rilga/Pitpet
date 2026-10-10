@@ -27,9 +27,9 @@
         "LOG_CHANNEL": "stderr",
         "SESSION_DRIVER": "cookie",
         "DB_CONNECTION": "mysql",
-        "DB_HOST": "ucj20t.h.filess.io",
-        "DB_PORT": "3307",
-        "DB_DATABASE": "pitpet_database_production",
-        "DB_USERNAME": "pitpet_database_production"
+        "DB_HOST": "3h6deu.h.filess.io",
+        "DB_PORT": "61002",
+        "DB_DATABASE": "pitpet_increasebe",
+        "DB_USERNAME": "pitpet_increasebe"
     }
 }
