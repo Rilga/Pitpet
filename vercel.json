@@ -30,6 +30,7 @@
         "DB_HOST": "3h6deu.h.filess.io",
         "DB_PORT": "61002",
         "DB_DATABASE": "pitpet_increasebe",
-        "DB_USERNAME": "pitpet_increasebe"
+        "DB_USERNAME": "pitpet_increasebe",
+        "DB_PASSWORD": "37cd5a0f778f0ed37185cffcbdf35af96fe64e38"
     }
 }
